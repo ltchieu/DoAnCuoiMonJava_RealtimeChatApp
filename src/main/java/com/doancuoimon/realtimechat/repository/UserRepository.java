@@ -8,6 +8,7 @@ package com.doancuoimon.realtimechat.repository;
  *
  * @author ADMIN
  */
+import com.doancuoimon.realtimechat.dto.request.UserCreationRequest;
 import com.doancuoimon.realtimechat.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

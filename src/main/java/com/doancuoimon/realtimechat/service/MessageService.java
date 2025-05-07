@@ -12,6 +12,7 @@ import com.doancuoimon.realtimechat.dto.request.ChatroomCreationRequest;
 import com.doancuoimon.realtimechat.dto.request.MessageCreationRequest;
 import com.doancuoimon.realtimechat.entity.Chatroom;
 import com.doancuoimon.realtimechat.entity.Message;
+import com.doancuoimon.realtimechat.repository.ChatroomRepository;
 import com.doancuoimon.realtimechat.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,21 +23,14 @@ import java.util.List;
 public class MessageService {
     @Autowired
     private MessageRepository messageRepository;
+    @Autowired
     private ChatRoomService chatRoomService;
 
     public Message saveMessage(
             MessageCreationRequest messageCreationRequest,
-            ChatroomCreationRequest chatRoomCreationRequest,
             String chatId
     ) {
-        Chatroom chatroom = new Chatroom();
-        if(chatId.isEmpty()) {
-            chatroom = chatRoomService.createChatRoom(chatRoomCreationRequest);
-        }
-        else {
-            chatroom = chatRoomService.getChatroom(chatId);
-        }
-
+        Chatroom chatroom = chatRoomService.getChatroom(chatId);
         Message message = new Message();
         message.setIdMessage(messageCreationRequest.getIdMessage());
         message.setNguoigui(messageCreationRequest.getNguoigui());
@@ -47,8 +41,11 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-    public List<Message> findChatMessages(String chatId) {
+    public List<Message> findChatMessages(String chatId) throws Exception {
         Chatroom chatroom = chatRoomService.getChatroom(chatId);
-        return chatroom.getMessages();
+        if(chatroom == null){
+            throw new RuntimeException("Khong tim thay chat room " + chatId);
+        }
+        return messageRepository.findMessageByidChatroom(chatroom);
     }
 }

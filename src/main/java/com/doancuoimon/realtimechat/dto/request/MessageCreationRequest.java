@@ -13,7 +13,7 @@ import com.doancuoimon.realtimechat.entity.User;
 import lombok.Value;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.util.Date;
 
 /**
  * DTO for {@link com.examplechatapplication.chatapp.entity.Message}
@@ -24,5 +24,5 @@ public class MessageCreationRequest implements Serializable {
     Chatroom idChatroom;
     String noidungtn;
     User nguoigui;
-    Instant thoigiangui;
+    Date thoigiangui;
 }

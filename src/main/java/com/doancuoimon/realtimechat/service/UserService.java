@@ -15,37 +15,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User createUser(UserCreationRequest request){
-        User user = new User();
-        user.setUserid(request.getUserid());
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
-        user.setNickname(request.getNickname());
-        user.setStatus(1);
-        return userRepository.save(user);
+    public User createUser(@RequestBody UserCreationRequest request){
+        System.out.println(request);
+        if(!Objects.isNull(request)){
+            User user = new User();
+            user.setUserid(request.getUserid());
+            user.setUsername(request.getUsername());
+            user.setPassword(request.getPassword());
+            user.setNickname(request.getNickname());
+            user.setStatus(1);
+            return userRepository.save(user);
+        }
+        return null;
     }//Tạo mới một user
 
     public User connected(String username){
-        User user = getIdUser(username);
+        User user = getUser(username);
 
         user.setStatus(1);
         return userRepository.save(user);
     }
 
     public User disconnected(String username){
-        User user = getIdUser(username);
+        User user = getUser(username);
 
         user.setStatus(2);
         return userRepository.save(user);
     }
 
-    public User getIdUser(String username){
+    public User getUser(String username){
         return userRepository.findById(username).orElseThrow( () -> new RuntimeException("User not found"));
     } //Tìm id của một User
 

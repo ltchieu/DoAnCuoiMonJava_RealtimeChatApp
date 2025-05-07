@@ -8,6 +8,7 @@ package com.doancuoimon.realtimechat.dto.request;
  *
  * @author ADMIN
  */
+import com.doancuoimon.realtimechat.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
@@ -23,6 +24,19 @@ public class UserCreationRequest implements Serializable {
     String userid;
     String username;
     String password;
-    String status;
+    int status;
     String nickname;
+
+    public UserCreationRequest() {
+    }
+
+    public UserCreationRequest(User user) {
+        this.userid = user.getUserid();
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.status = user.getStatus();
+        this.nickname = user.getNickname();
+    }
+    
+    
 }

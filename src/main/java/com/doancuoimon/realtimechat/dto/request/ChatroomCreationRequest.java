@@ -15,14 +15,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Getter
 @Setter
 public class ChatroomCreationRequest {
-    private String idChatroom;
     private LocalDate ngayTao;
     private String tenchatroom;
     private BackgroundColor idChuDe;
-    private Set<ChatroomMember> chatroomMembers;
+    private List<String> idNguoiNhan;
 }

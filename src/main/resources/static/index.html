@@ -1,15 +1,33 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
+<html lang="en">
+<head>
+  <title>STOMP WebSocket Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+  <h2>WebSocket STOMP Test</h2>
+<!--  <script>-->
+<!--    const socket = new SockJS('http://localhost:8080/chatapp');-->
+<!--    const stompClient = Stomp.over(socket);-->
+
+<!--    stompClient.connect({}, function (frame) {-->
+<!--      console.log('CONNECTED:', frame);-->
+
+<!--      // Subscribe to user topic-->
+<!--      stompClient.subscribe('/user/topic', function (msg) {-->
+<!--        console.log('Received:', msg.body);-->
+<!--      });-->
+
+<!--      // Send test user-->
+<!--      stompClient.send("/app/users.addUser", {}, JSON.stringify({-->
+<!--        userid: "USER007",-->
+<!--        username: "tester",-->
+<!--        password: "123456",-->
+<!--        status: 1,-->
+<!--        nickname: "Cong hieu"-->
+<!--      }));-->
+<!--    });-->
+<!--  </script>-->
+</body>
 </html>
