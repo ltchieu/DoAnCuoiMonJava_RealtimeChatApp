@@ -28,6 +28,13 @@ public class ChatroomMemberId implements Serializable {
     @Column(name = "ID_NGUOINHAN", nullable = false)
     private String idNguoinhan;
 
+    public ChatroomMemberId() {}
+
+    public ChatroomMemberId(String idChatroom, String idNguoinhan) {
+        this.idChatroom = idChatroom;
+        this.idNguoinhan = idNguoinhan;
+    }
+
     // Cần triển khai equals() và hashCode() cho khóa chính composite
     @Override
     public boolean equals(Object o) {

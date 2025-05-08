@@ -13,7 +13,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -42,8 +44,8 @@ public class User {
     @Column(name = "NICKNAME", length = 300)
     private String nickname;
 
-    @OneToMany(mappedBy = "idNguoinhan")
-    private Set<ChatroomMember> chatroomMembers = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "idNguoinhan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatroomMember> chatroomMembers = new ArrayList<>();
 
     @OneToMany(mappedBy = "nguoigui")
     private Set<Message> messages = new LinkedHashSet<>();

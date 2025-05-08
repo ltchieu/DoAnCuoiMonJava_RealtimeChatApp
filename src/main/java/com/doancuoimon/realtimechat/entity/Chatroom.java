@@ -43,7 +43,7 @@ public class Chatroom {
     @Column(name = "TENCHATROOM", length = 200)
     private String tenchatroom;
 
-    @OneToMany(mappedBy = "idChatroom")
-    private Set<ChatroomMember> chatroomMembers = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "idChatroom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatroomMember> chatroomMembers = new ArrayList<>();
 
 }

@@ -15,14 +15,15 @@ import com.doancuoimon.realtimechat.entity.ChatroomMemberId;
 import com.doancuoimon.realtimechat.entity.User;
 import com.doancuoimon.realtimechat.repository.ChatroomMemberRepository;
 import com.doancuoimon.realtimechat.repository.ChatroomRepository;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class ChatRoomService {
@@ -32,48 +33,48 @@ public class ChatRoomService {
     private ChatroomMemberRepository chatroomMemberRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private EntityManager entityManager;
 
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Chatroom createChatRoom(ChatroomCreationRequest chatRoomCreationRequest) {
-        Chatroom chatroom = new Chatroom();
 
+        if(chatRoomCreationRequest.getNguoiNhans() == null){
+            throw new RuntimeException("Khong nhan duoc danh sach nguoi nhan tu client");
+        }
+        Chatroom chatroom = new Chatroom();
+        User user = new User();
+        List<User> nguoiNhans = chatRoomCreationRequest.getNguoiNhans();
+        List<ChatroomMember> members = new ArrayList<>();
 
         var chatID = "chat_" + System.currentTimeMillis();
         //Tạo mới một phòng chat
         chatroom.setIdChatroom(chatID);
-        if(chatRoomCreationRequest.getIdNguoiNhan().size() == 1)
+        chatroom.setIdChude(chatRoomCreationRequest.getIdChuDe());
+        chatroom.setNgaylap(LocalDate.now());
+        if(nguoiNhans.size() == 1)
         {
-            User u = userService.getUser(chatRoomCreationRequest.getIdNguoiNhan().getFirst());
-            String nickname = u.getNickname();
+            String nickname = user.getNickname();
             chatroom.setTenchatroom(nickname);
         }
         else {
             chatroom.setTenchatroom(chatRoomCreationRequest.getTenchatroom());
         }
-        chatroom.setIdChude(chatRoomCreationRequest.getIdChuDe());
-        chatroom.setNgaylap(chatRoomCreationRequest.getNgayTao());
-        chatroomRepository.save(chatroom);
 
-        System.out.println("idNguoiNhan: " + chatRoomCreationRequest.getIdNguoiNhan());
-        for (String id : chatRoomCreationRequest.getIdNguoiNhan()) {
+        chatroomRepository.save(chatroom);
+        for(User member : nguoiNhans){
+            user = entityManager.getReference(User.class, member.getUserid());
             ChatroomMemberId chatroomMemberId = new ChatroomMemberId();
-            User user = userService.getUser(id);
-            //Tạo khóa chính cho ChatroomMemberId
             chatroomMemberId.setIdChatroom(chatID);
             chatroomMemberId.setIdNguoinhan(user.getUserid());
-            if (chatroomMemberRepository.existsById(chatroomMemberId)) {
-                continue; // Bỏ qua nếu đã tồn tại
-            }
-            //Tạo mới thành viên của phòng chat
-            ChatroomMember chatroomMember = new ChatroomMember();
-            chatroomMember.setId(chatroomMemberId);
-            chatroomMember.setIdChatroom(chatroom);
-            chatroomMember.setIdNguoinhan(user);
-            chatroomMember.setNgaythamgia(Instant.now());
-            System.out.println("Before saving ChatroomMember: " + chatroomMemberId);
-            chatroomMemberRepository.save(chatroomMember);
-            System.out.println("After saving ChatroomMember: " + chatroomMemberId);
+
+            ChatroomMember chatroomMember = new ChatroomMember(chatroom, user, Instant.now(), chatroomMemberId);
+            members.add(chatroomMember);
         }
 
+        chatroom.setChatroomMembers(members);
+        chatroomRepository.save(chatroom);
         return chatroom;
     }
 

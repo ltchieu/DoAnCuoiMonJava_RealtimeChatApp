@@ -38,23 +38,23 @@ public class UserService {
         return null;
     }//Tạo mới một user
 
-    public User connected(String username){
-        User user = getUser(username);
+    public User connected(String id){
+        User user = getUser(id);
 
         user.setStatus(1);
         return userRepository.save(user);
     }
 
-    public User disconnected(String username){
-        User user = getUser(username);
+    public User disconnected(String id){
+        User user = getUser(id);
 
         user.setStatus(2);
         return userRepository.save(user);
     }
 
-    public User getUser(String username){
-        return userRepository.findById(username).orElseThrow( () -> new RuntimeException("User not found"));
-    } //Tìm id của một User
+    public User getUser(String id){
+        return userRepository.findById(id).orElseThrow( () -> new RuntimeException("User not found"));
+    } //Tìm một User theo id
 
     public List<User> getConnectedUsers(){
         return userRepository.findAllByStatus(1);

@@ -8,6 +8,7 @@ package com.doancuoimon.realtimechat.entity;
  *
  * @author ADMIN
  */
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,9 +23,10 @@ public class ChatroomMember {
     @EmbeddedId
     private ChatroomMemberId id;
 
-    @MapsId
+    @MapsId("idChatroom")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_CHATROOM", nullable = false)
+    @JoinColumn(name = "ID_CHATROOM", nullable = false, referencedColumnName = "ID_CHATROOM")
+    @JsonIgnore
     private Chatroom idChatroom;
 
     @Column(name = "NGAYTHAMGIA")
@@ -33,9 +35,18 @@ public class ChatroomMember {
     @Column(name = "NGAYROIDI")
     private Instant ngayroidi;
 
-    @MapsId
+    @MapsId("idNguoinhan")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ID_NGUOINHAN", nullable = false)
+    @JsonIgnore
     private User idNguoinhan;
 
+    public ChatroomMember() {}
+
+    public ChatroomMember(Chatroom chatroom, User user, Instant ngaythamgia, ChatroomMemberId id) {
+        this.idChatroom = chatroom;
+        this.idNguoinhan = user;
+        this.ngaythamgia = ngaythamgia;
+        this.id = id;
+    }
 }
