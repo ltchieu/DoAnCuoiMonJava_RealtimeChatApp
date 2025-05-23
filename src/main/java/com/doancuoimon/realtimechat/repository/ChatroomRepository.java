@@ -9,7 +9,10 @@ package com.doancuoimon.realtimechat.repository;
  * @author ADMIN
  */
 import com.doancuoimon.realtimechat.entity.Chatroom;
+import com.doancuoimon.realtimechat.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 public interface ChatroomRepository extends JpaRepository<Chatroom, String> {
 }

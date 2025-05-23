@@ -5,20 +5,20 @@
 package com.doancuoimon.realtimechat.controller;
 
 /**
- *
  * @author ADMIN
  */
-import com.doancuoimon.realtimechat.dto.request.ChatroomCreationRequest;
-import com.doancuoimon.realtimechat.dto.request.MessageCreationRequest;
-import com.doancuoimon.realtimechat.dto.request.MessageRespone;
-import com.doancuoimon.realtimechat.dto.request.UserCreationRequest;
+
+import com.doancuoimon.realtimechat.dto.request.*;
 import com.doancuoimon.realtimechat.entity.Chatroom;
 import com.doancuoimon.realtimechat.entity.Message;
 import com.doancuoimon.realtimechat.entity.User;
 import com.doancuoimon.realtimechat.service.ChatRoomService;
 import com.doancuoimon.realtimechat.service.MessageService;
 import com.doancuoimon.realtimechat.service.UserService;
+
 import java.util.ArrayList;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
 import org.springframework.messaging.simp.annotation.SendToUser;
 
 @RestController
@@ -77,10 +78,10 @@ public class Controller {
     ) throws Exception {
         List<Message> lst = messageService.findChatMessages(chatId);
         List<MessageRespone> kq = new ArrayList<>();
-        if(lst.isEmpty()){
+        if (lst.isEmpty()) {
             throw new RuntimeException("Khong co tin nhan nao " + chatId);
         }
-        for(Message m : lst){
+        for (Message m : lst) {
             MessageRespone mr = new MessageRespone(m);
             kq.add(mr);
         }
@@ -88,12 +89,24 @@ public class Controller {
     }
 
     @MessageMapping("/chat")
+    @Transactional
     public void processMessage(
-            @Payload MessageCreationRequest message,
-            @Payload String chatId
+            @Payload MessageCreationRequest message
     ) {
-        Message newMessage = messageService.saveMessage(message, chatId);
-//        messagingTemplate.convertAndSendToUser();
+        Message newMessage = messageService.saveMessage(message);
+        List<User> lstIdNguoiNhan = chatRoomService.getChatroomMembers(newMessage.getIdChatroom().getIdChatroom());
+        for (User u : lstIdNguoiNhan) {
+            ChatNofitication chatNofitication = new ChatNofitication(
+                    newMessage.getIdChatroom().getIdChatroom(),
+                    newMessage.getNoidungtn(),
+                    newMessage.getNguoigui().getUserid(),
+                    u.getUsername()
+            );
+            messagingTemplate.convertAndSendToUser(
+                    u.getUserid(), "/queue/messages", chatNofitication
+                    );
+        }
+
     }
     //endregion
 
