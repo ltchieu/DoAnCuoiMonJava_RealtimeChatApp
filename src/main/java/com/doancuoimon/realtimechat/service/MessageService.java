@@ -17,6 +17,9 @@ import com.doancuoimon.realtimechat.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -27,16 +30,15 @@ public class MessageService {
     private ChatRoomService chatRoomService;
 
     public Message saveMessage(
-            MessageCreationRequest messageCreationRequest,
-            String chatId
+            MessageCreationRequest messageCreationRequest
     ) {
-        Chatroom chatroom = chatRoomService.getChatroom(chatId);
+        Chatroom chatroom = chatRoomService.getChatroom(messageCreationRequest.getIdChatroom());
         Message message = new Message();
         message.setIdMessage(messageCreationRequest.getIdMessage());
         message.setNguoigui(messageCreationRequest.getNguoigui());
         message.setIdChatroom(chatroom);
         message.setNoidungtn(messageCreationRequest.getNoidungtn());
-        message.setThoigiangui(messageCreationRequest.getThoigiangui());
+        message.setThoigiangui(new Date());
 
         return messageRepository.save(message);
     }

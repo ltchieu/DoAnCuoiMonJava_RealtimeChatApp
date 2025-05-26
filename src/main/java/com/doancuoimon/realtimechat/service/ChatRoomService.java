@@ -81,4 +81,18 @@ public class ChatRoomService {
     public Chatroom getChatroom(String chatId) {
         return chatroomRepository.findById(chatId.trim()).orElse(null);
     }
+
+    public List<User> getChatroomMembers(String chatId) {
+        Chatroom c = getChatroom(chatId);
+        if(c == null){
+            return null;
+        }
+        else{
+            List<User> lstUsers = new ArrayList<>();
+            for(ChatroomMember member : c.getChatroomMembers()){
+                lstUsers.add(member.getIdNguoinhan());
+            }
+            return lstUsers;
+        }
+    }
 }

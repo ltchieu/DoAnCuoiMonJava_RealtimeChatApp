@@ -21,8 +21,7 @@ import java.util.Date;
 @Value
 public class MessageCreationRequest implements Serializable {
     String idMessage;
-    Chatroom idChatroom;
+    String idChatroom;
     String noidungtn;
     User nguoigui;
-    Date thoigiangui;
 }
