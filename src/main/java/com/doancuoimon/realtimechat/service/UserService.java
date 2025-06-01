@@ -10,54 +10,76 @@ package com.doancuoimon.realtimechat.service;
  */
 import com.doancuoimon.realtimechat.dto.request.UserCreationRequest;
 import com.doancuoimon.realtimechat.entity.User;
+import com.doancuoimon.realtimechat.entity.UserDetailsImpl;
 import com.doancuoimon.realtimechat.repository.UserRepository;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
+@Slf4j
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    public User createUser(@RequestBody UserCreationRequest request){
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public User createUser(@RequestBody UserCreationRequest request) {
         System.out.println(request);
-        if(!Objects.isNull(request)){
+        if (!Objects.isNull(request)) {
             User user = new User();
             user.setUserid(request.getUserid());
             user.setUsername(request.getUsername());
-            user.setPassword(request.getPassword());
-            user.setNickname(request.getNickname());
-            user.setStatus(1);
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setNickname(request.getNickname()); user.setStatus(1);
             return userRepository.save(user);
         }
         return null;
-    }//Tạo mới một user
+    }// Tạo mới một user
 
-    public User connected(String id){
+    public User connected(String id) {
         User user = getUser(id);
 
         user.setStatus(1);
         return userRepository.save(user);
     }
 
-    public User disconnected(String id){
+    public User disconnected(String id) {
         User user = getUser(id);
 
         user.setStatus(2);
         return userRepository.save(user);
     }
 
-    public User getUser(String id){
-        return userRepository.findById(id).orElseThrow( () -> new RuntimeException("User not found"));
-    } //Tìm một User theo id
+    public User getUser(String id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    } // Tìm một User theo id
 
-    public List<User> getConnectedUsers(){
+    public List<User> getConnectedUsers() {
         return userRepository.findAllByStatus(1);
-    }//Lấy ra các user có trạng thái là đang hoạt động
-}
+    }// Lấy ra các user có trạng thái là đang hoạt động
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.info("Dang nhap username {}", username);
+        Optional<User> optUser = userRepository.findByUsername(username); // Tìm user trong db bằng JPA sau đó trả về object Optional<User> để kiểm tra null
+
+        if (optUser.isEmpty()) {
+            throw new UsernameNotFoundException(String.format("Không thể tìm thấy username này %s", username));
+        } else
+            return new UserDetailsImpl(optUser.get()); // Trả về object thực thi interface UserDetails để xử lý xác thực, ủy quyền
+    }
+}
