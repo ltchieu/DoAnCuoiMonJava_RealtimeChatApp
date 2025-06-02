@@ -16,25 +16,21 @@ import lombok.Value;
 import java.io.Serializable;
 
 /**
- * DTO for {@link com.examplechatapplication.chatapp.entity.User}
+ * DTO for {@link com.doancuoimon.realtimechat.entity.User}
  */
 @Getter
 @Setter
 public class UserCreationRequest implements Serializable {
-    String userid;
     String username;
     String password;
-    int status;
     String nickname;
 
     public UserCreationRequest() {
     }
 
     public UserCreationRequest(User user) {
-        this.userid = user.getUserid();
         this.username = user.getUsername();
         this.password = user.getPassword();
-        this.status = user.getStatus();
         this.nickname = user.getNickname();
     }
     

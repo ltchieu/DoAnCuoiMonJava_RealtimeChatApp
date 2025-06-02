@@ -38,14 +38,23 @@ public class UserService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     public User createUser(@RequestBody UserCreationRequest request) {
-        System.out.println(request);
         if (!Objects.isNull(request)) {
-            User user = new User();
-            user.setUserid(request.getUserid());
-            user.setUsername(request.getUsername());
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setNickname(request.getNickname()); user.setStatus(1);
-            return userRepository.save(user);
+            Optional<User> u = userRepository.findByUsername(request.getUsername());
+            if(u.isEmpty())
+            {
+                User user = new User();
+                var userID = "U" + System.currentTimeMillis();
+                user.setUserid(userID);
+
+                user.setUsername(request.getUsername());
+
+                user.setPassword(passwordEncoder.encode(request.getPassword()));
+                user.setNickname(request.getNickname());
+                user.setStatus(1);
+                return userRepository.save(user);
+            }
+            else
+                throw new IllegalArgumentException("Username này đã tồn tại");
         }
         return null;
     }// Tạo mới một user
@@ -78,7 +87,7 @@ public class UserService implements UserDetailsService {
         Optional<User> optUser = userRepository.findByUsername(username); // Tìm user trong db bằng JPA sau đó trả về object Optional<User> để kiểm tra null
 
         if (optUser.isEmpty()) {
-            throw new UsernameNotFoundException(String.format("Không thể tìm thấy username này %s", username));
+            throw new UsernameNotFoundException(String.format("Không thể tìm thấy username %s", username));
         } else
             return new UserDetailsImpl(optUser.get()); // Trả về object thực thi interface UserDetails để xử lý xác thực, ủy quyền
     }

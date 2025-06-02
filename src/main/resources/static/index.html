@@ -6,28 +6,118 @@
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
-  <h2>WebSocket STOMP Test</h2>
-<!--  <script>-->
-<!--    const socket = new SockJS('http://localhost:8080/chatapp');-->
-<!--    const stompClient = Stomp.over(socket);-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chào mừng đến với RealtimeChat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
 
-<!--    stompClient.connect({}, function (frame) {-->
-<!--      console.log('CONNECTED:', frame);-->
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #ffffff);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
 
-<!--      // Subscribe to user topic-->
-<!--      stompClient.subscribe('/user/topic', function (msg) {-->
-<!--        console.log('Received:', msg.body);-->
-<!--      });-->
+    .welcome-container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
 
-<!--      // Send test user-->
-<!--      stompClient.send("/app/users.addUser", {}, JSON.stringify({-->
-<!--        userid: "USER007",-->
-<!--        username: "tester",-->
-<!--        password: "123456",-->
-<!--        status: 1,-->
-<!--        nickname: "Cong hieu"-->
-<!--      }));-->
-<!--    });-->
-<!--  </script>-->
+    h1 {
+      color: #1e88e5;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    p {
+      color: #424242;
+      font-size: 1.1em;
+      margin-bottom: 30px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 1em;
+      color: #ffffff;
+      background-color: #1e88e5;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #757575;
+    }
+
+    .footer a {
+      color: #1e88e5;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="welcome-container">
+  <h1>Chào mừng đến với RealtimeChat</h1>
+  <p>Hãy bắt đầu hành trình trò chuyện của bạn ngay hôm nay!</p>
+  <div class="button-group">
+    <button onclick="redirectToSignIn()">Đăng nhập</button>
+    <button onclick="redirectToSignUp()">Đăng ký</button>
+  </div>
+  <div class="footer">
+    Đã có tài khoản? <a href="/auth/sign-in.html">Đăng nhập ngay</a> |
+    Cần trợ giúp? <a href="#">Liên hệ hỗ trợ</a>
+  </div>
+</div>
+
+<script>
+  function redirectToSignIn() {
+    window.location.href = "/auth/sign-in.html";
+  }
+
+  function redirectToSignUp() {
+    window.location.href = "/auth/sign-up.html";
+  }
+</script>
+</body>
+</html>
+
 </body>
 </html>

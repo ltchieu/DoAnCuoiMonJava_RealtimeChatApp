@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
         setupPasswordToggle("confirmPassword", "toggleConfirmPassword");
     }
 
-     if (signInForm) {
+    if (signInForm) {
         signInForm.addEventListener("submit", async function(e) {
             e.preventDefault();
 
@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
+            const errorDiv = document.getElementById("login-error");
+            errorDiv.style.display = "none";
+            errorDiv.style.color = "red";
 
             // Validate fields
             let isValid = true;
@@ -35,22 +38,32 @@ document.addEventListener("DOMContentLoaded", function() {
 
             if (isValid) {
                 // Gửi yêu cầu đăng nhập thực tế tới backend
-                const response = await fetch("/login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-                });
+                try {
+                    const response = await fetch("/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+                    });
 
-                if (response.ok) {
-                    window.location.href = "/chat";
-                } else {
-                    showError("password", "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+                    const data = await response.text();
+
+                    if (response.ok) {
+                        sessionStorage.setItem("username", username); // Lưu username
+                        window.location.href = "/chat/index.html";
+                    } else {
+                        errorDiv.style.display = "block";
+                        errorDiv.textContent = data;
+                    }
+                } catch (err) {
+                    errorDiv.style.display = "block";
+                    errorDiv.textContent = "Đã xảy ra lỗi khi kết nối đến server.";
                 }
             }
         });
-    }    
+    }
+
     if (signUpForm) {
         signUpForm.addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -101,13 +114,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     const response = await fetch("/sign-up", {
                         method: "POST",
                         headers: {
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
                             username: username,
                             password: password,
-                            nickname: nickname
-                        })
+                            nickname: nickname,
+                        }),
                     });
 
                     if (response.ok) {
@@ -121,6 +134,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
     // Helper functions
     function setupPasswordToggle(inputId, toggleId) {
         const passwordInput = document.getElementById(inputId);
@@ -129,9 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (passwordInput && toggleButton) {
             toggleButton.addEventListener("click", function() {
                 const type =
-                    passwordInput.getAttribute("type") === "password"
-                        ? "text"
-                        : "password";
+                    passwordInput.getAttribute("type") === "password" ? "text" : "password";
                 passwordInput.setAttribute("type", type);
             });
         }
@@ -160,28 +172,4 @@ document.addEventListener("DOMContentLoaded", function() {
             element.classList.remove("error");
         });
     }
-
 });
-
-document
-    .getElementById("signInForm")
-    .addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-
-        const response = await fetch("/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-        });
-
-        if (response.ok) {
-            window.location.href = "/chat";
-        } else {
-            document.getElementById("password-error").textContent =
-                "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
-        }
-    });
