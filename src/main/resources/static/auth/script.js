@@ -130,8 +130,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function simulateAuth(username, isLogin) {
-        // In a real application, you would send data to a server here
-        // This is just a simulation for demonstration purposes
         
         // Store user data in localStorage (for demo purposes only)
         if (!isLogin) {
