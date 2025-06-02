@@ -38,13 +38,14 @@ public class UserService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     public User createUser(@RequestBody UserCreationRequest request) {
-        System.out.println(request);
         if (!Objects.isNull(request)) {
             User user = new User();
-            user.setUserid(request.getUserid());
+            var userID = "U" + System.currentTimeMillis();
+            user.setUsername(userID);
             user.setUsername(request.getUsername());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setNickname(request.getNickname()); user.setStatus(1);
+            user.setNickname(request.getNickname());
+            user.setStatus(1);
             return userRepository.save(user);
         }
         return null;
