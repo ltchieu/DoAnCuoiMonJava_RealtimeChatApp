@@ -119,7 +119,7 @@ public class Controller {
                     newMessage.getNoidungtn(),
                     newMessage.getNguoigui().getUserid(),
                     u.getUsername());
-            String destination = "/queue/messages/" + message.getIdChatroom();
+            String destination = "/topic/messages/" + message.getIdChatroom();
             log.info("destination {} length {}", destination, destination.length());
             messagingTemplate.convertAndSend(destination, chatNofitication);
         }

@@ -22,14 +22,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Connect to WebSocket
     function connectSocket(chatroomId) {
+        if (stompClient && stompClient.connected) {
+            stompClient.disconnect(() => {
+                console.log("Disconnected previous socket");
+            });
+        }
         const socket = new SockJS("/ws");
         stompClient = Stomp.over(socket);
         stompClient.connect({}, () => {
-            console.log("Connecting")
-            stompClient.subscribe(`/queue/messages/${chatroomId}`, (message) => {
+            console.log("Connecting");
+            stompClient.subscribe(`/topic/messages/${chatroomId}`, (message) => {
                 const notification = JSON.parse(message.body);
-                console.log(notification)
-                console.log("connected")
+                console.log(notification);
+                console.log("connected");
                 if (notification.idChatroom === currentChatId) {
                     addMessage(notification.noidungtn, false);
                 }
@@ -163,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const createRes = await fetch("/chatroom", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ members: [user.username] }),
+                    body: JSON.stringify({ usernameNguoiNhans: [user.username] }),
                 });
                 if (createRes.ok) {
                     const newChat = await createRes.json();
@@ -184,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentChatId = chatId;
         sendButton.disabled = false; // Enable send button if chatroom exists or is created
 
+        console.log("heelo")
         // Fetch and display messages after finding/creating chatroom
         chatMessages.innerHTML = "";
         fetch(`/messages/${currentChatId}`)
@@ -192,18 +198,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 return res.json();
             })
             .then((messages) => {
-                if (!messages.length) {
+                console.log(messages, messages.length === 0)
+                if (messages.length === 0) {
                     chatMessages.innerHTML =
                         "<div class='message-date'>No messages yet.</div>";
                 } else {
                     messages.forEach((msg) => {
                         addMessage(
-                            msg.noidungtn || msg.content,
-                            msg.tenNguoigui === currentUser.username
+                            msg.noidungtn,
+                            msg.tenNguoiGui === currentUser.username,
                         );
                     });
                 }
-                connectSocket(currentChatId)
+                connectSocket(currentChatId);
             })
             .catch(() => {
                 chatMessages.innerHTML =
