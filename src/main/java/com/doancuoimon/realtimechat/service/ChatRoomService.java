@@ -33,8 +33,6 @@ public class ChatRoomService {
         Chatroom chatroom = new Chatroom();
 
         List<User> listNguoiNhans = userService.getUserByUsernames(request.getUsernameNguoiNhans());
-        if (listNguoiNhans.isEmpty())
-            throw new IllegalArgumentException("Khong co nguoi nhan nao");
         String chatID = "chat_" + System.currentTimeMillis();
         chatroom.setIdChatroom(chatID);
         chatroom.setIdChude(request.getIdChuDe());
