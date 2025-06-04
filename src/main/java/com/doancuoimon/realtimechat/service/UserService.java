@@ -81,6 +81,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findAllByStatus(1);
     }// Lấy ra các user có trạng thái là đang hoạt động
 
+    public List<User> getUserByUsernames(List<String> usernames) {
+        return this.userRepository.findByUsernameIn(usernames);
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Dang nhap username {}", username);
@@ -90,5 +94,10 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException(String.format("Không thể tìm thấy username %s", username));
         } else
             return new UserDetailsImpl(optUser.get()); // Trả về object thực thi interface UserDetails để xử lý xác thực, ủy quyền
+    }
+
+    public User getUserFromUserDetails(UserDetails userDetails) {
+        UserDetailsImpl convertUserDetails = (UserDetailsImpl) userDetails;
+        return convertUserDetails.user();
     }
 }

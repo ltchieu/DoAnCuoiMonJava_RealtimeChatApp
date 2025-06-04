@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/", "/index.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers("/ws/**", "/chatapp/**", "/app/**", "/topic/**", "/user/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/sign-up").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(c -> c

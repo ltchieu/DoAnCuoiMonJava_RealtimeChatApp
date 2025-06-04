@@ -163,25 +163,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 
-document
-    .getElementById("signInForm")
-    .addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-
-        const response = await fetch("/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-        });
-
-        if (response.ok) {
-            window.location.href = "/chat";
-        } else {
-            document.getElementById("password-error").textContent =
-                "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
-        }
-    });

@@ -12,6 +12,7 @@ import com.doancuoimon.realtimechat.dto.request.ChatroomCreationRequest;
 import com.doancuoimon.realtimechat.dto.request.MessageCreationRequest;
 import com.doancuoimon.realtimechat.entity.Chatroom;
 import com.doancuoimon.realtimechat.entity.Message;
+import com.doancuoimon.realtimechat.entity.User;
 import com.doancuoimon.realtimechat.repository.ChatroomRepository;
 import com.doancuoimon.realtimechat.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +31,13 @@ public class MessageService {
     private ChatRoomService chatRoomService;
 
     public Message saveMessage(
-            MessageCreationRequest messageCreationRequest
+            MessageCreationRequest messageCreationRequest,
+            User nguoiGui
     ) {
         Chatroom chatroom = chatRoomService.getChatroom(messageCreationRequest.getIdChatroom());
         Message message = new Message();
-        message.setIdMessage(messageCreationRequest.getIdMessage());
-        message.setNguoigui(messageCreationRequest.getNguoigui());
+        message.setIdMessage("chat" + System.currentTimeMillis());
+        message.setNguoigui(nguoiGui);
         message.setIdChatroom(chatroom);
         message.setNoidungtn(messageCreationRequest.getNoidungtn());
         message.setThoigiangui(new Date());
