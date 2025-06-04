@@ -45,12 +45,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(c -> c
+                        .requestMatchers(HttpMethod.GET, "/", "/index.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/sign-up").permitAll()
                         .anyRequest().authenticated())
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(c -> {});
+                .formLogin(c -> c
+                            .loginPage("/auth/sign-in.html")
+                            .loginProcessingUrl("/login")
+                            .permitAll())
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

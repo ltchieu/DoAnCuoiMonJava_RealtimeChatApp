@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
 
                 if (response.ok) {
-                    window.location.href = "/chat";
+                    window.location.href = "/chat/index.html";
                 } else {
                     showError("password", "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
                 }
