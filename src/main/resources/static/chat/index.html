@@ -12,7 +12,6 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="user-profile">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Profile" class="avatar">
                     <h3>My Chat</h3>
                 </div>
                 <div class="icons">
@@ -26,48 +25,17 @@
                     <input type="text" placeholder="Search Messenger">
                 </div>
             </div>
-            <div class="contacts">
-                <div class="contact active">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
-                    <div class="contact-info">
-                        <h4>John Doe</h4>
-                        <p>Hey, how are you?</p>
-                    </div>
-                    <span class="time">12:30 PM</span>
-                </div>
-                <div class="contact">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
-                    <div class="contact-info">
-                        <h4>Jane Smith</h4>
-                        <p>See you tomorrow!</p>
-                    </div>
-                    <span class="time">Yesterday</span>
-                </div>
-                <div class="contact">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
-                    <div class="contact-info">
-                        <h4>Team Chat</h4>
-                        <p>Meeting at 3 PM</p>
-                    </div>
-                    <span class="time">2d</span>
-                </div>
-                <div class="contact">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
-                    <div class="contact-info">
-                        <h4>Alex Johnson</h4>
-                        <p>Thanks for the help!</p>
-                    </div>
-                    <span class="time">1w</span>
-                </div>
+            <div class="contacts" id="contacts">
+                <!-- Contacts will be loaded here dynamically -->
             </div>
         </div>
         <div class="chat-container">
             <div class="chat-header">
                 <div class="chat-user">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
+                    <img src="https://i.pinimg.com/236x/8a/9d/6e/8a9d6e85a93b8b3a8002896da71882a3.jpg" alt="Contact" class="avatar" id="chat-avatar">
                     <div>
-                        <h3>John Doe</h3>
-                        <p>Active now</p>
+                        <h3 id="chat-username">Select a contact</h3>
+                        <p id="chat-status"></p>
                     </div>
                 </div>
                 <div class="chat-actions">
@@ -77,34 +45,7 @@
                 </div>
             </div>
             <div class="chat-messages" id="chat-messages">
-                <div class="message-date">Today</div>
-                <div class="message received">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
-                    <div class="message-content">
-                        <p>Hey there! How's it going?</p>
-                        <span class="time">10:30 AM</span>
-                    </div>
-                </div>
-                <div class="message sent">
-                    <div class="message-content">
-                        <p>Hi! I'm doing great, thanks for asking. How about you?</p>
-                        <span class="time">10:32 AM</span>
-                    </div>
-                </div>
-                <div class="message received">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
-                    <div class="message-content">
-                        <p>I'm good too! Just working on some projects.</p>
-                        <span class="time">10:33 AM</span>
-                    </div>
-                </div>
-                <div class="message received">
-                    <img src="https://www.behance.net/gallery/95636919/Minimalist-Avatar-Illustration" alt="Contact" class="avatar">
-                    <div class="message-content">
-                        <p>Did you finish that report we talked about?</p>
-                        <span class="time">10:34 AM</span>
-                    </div>
-                </div>
+                <!-- Messages will be loaded here dynamically -->
             </div>
             <div class="chat-input">
                 <div class="input-actions">
@@ -120,6 +61,8 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

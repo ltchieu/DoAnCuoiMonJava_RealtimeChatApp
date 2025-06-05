@@ -4,78 +4,56 @@
  */
 package com.doancuoimon.realtimechat.service;
 
+import com.doancuoimon.realtimechat.dto.request.ChatroomCreationRequest;
+import com.doancuoimon.realtimechat.dto.response.ChatroomResponse;
+
 /**
  * @author ADMIN
  */
 
-import com.doancuoimon.realtimechat.dto.request.ChatroomCreationRequest;
 import com.doancuoimon.realtimechat.entity.Chatroom;
-import com.doancuoimon.realtimechat.entity.ChatroomMember;
-import com.doancuoimon.realtimechat.entity.ChatroomMemberId;
+import com.doancuoimon.realtimechat.entity.Message;
 import com.doancuoimon.realtimechat.entity.User;
-import com.doancuoimon.realtimechat.repository.ChatroomMemberRepository;
 import com.doancuoimon.realtimechat.repository.ChatroomRepository;
-import jakarta.persistence.EntityManager;
+
+import io.micrometer.common.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ChatRoomService {
     @Autowired
     private ChatroomRepository chatroomRepository;
     @Autowired
-    private ChatroomMemberRepository chatroomMemberRepository;
-    @Autowired
     private UserService userService;
-    @Autowired
-    private EntityManager entityManager;
 
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Chatroom createChatRoom(ChatroomCreationRequest chatRoomCreationRequest) {
-
-        if(chatRoomCreationRequest.getNguoiNhans() == null){
-            throw new RuntimeException("Khong nhan duoc danh sach nguoi nhan tu client");
-        }
+    public Chatroom createChatroom(ChatroomCreationRequest request, User nguoiTao) {
         Chatroom chatroom = new Chatroom();
-        User user = new User();
-        List<User> nguoiNhans = chatRoomCreationRequest.getNguoiNhans();
-        List<ChatroomMember> members = new ArrayList<>();
 
-        var chatID = "chat_" + System.currentTimeMillis();
-        //Tạo mới một phòng chat
+        List<User> listNguoiNhans = userService.getUserByUserids(request.getUseridNguoiNhans());
+        String chatID = "chat_" + System.currentTimeMillis();
         chatroom.setIdChatroom(chatID);
-        chatroom.setIdChude(chatRoomCreationRequest.getIdChuDe());
+        chatroom.setIdChude(request.getIdChuDe());
+        chatroom.getChatroomMembers().addAll(listNguoiNhans);
+        chatroom.getChatroomMembers().add(nguoiTao);
+
+        if (StringUtils.isEmpty(request.getTenchatroom()))
+            chatroom.setTenchatroom(
+                    String.join(" & ", chatroom.getChatroomMembers().stream()
+                            .map(User::getNickname)
+                            .toList()));
+        else
+            chatroom.setTenchatroom(request.getTenchatroom());
         chatroom.setNgaylap(LocalDate.now());
-        if(nguoiNhans.size() == 1)
-        {
-            String nickname = user.getNickname();
-            chatroom.setTenchatroom(nickname);
-        }
-        else {
-            chatroom.setTenchatroom(chatRoomCreationRequest.getTenchatroom());
-        }
 
-        chatroomRepository.save(chatroom);
-        for(User member : nguoiNhans){
-            user = entityManager.getReference(User.class, member.getUserid());
-            ChatroomMemberId chatroomMemberId = new ChatroomMemberId();
-            chatroomMemberId.setIdChatroom(chatID);
-            chatroomMemberId.setIdNguoinhan(user.getUserid());
-
-            ChatroomMember chatroomMember = new ChatroomMember(chatroom, user, Instant.now(), chatroomMemberId);
-            members.add(chatroomMember);
-        }
-
-        chatroom.setChatroomMembers(members);
-        chatroomRepository.save(chatroom);
-        return chatroom;
+        return chatroomRepository.save(chatroom);
     }
 
     public Chatroom getChatroom(String chatId) {
@@ -84,15 +62,84 @@ public class ChatRoomService {
 
     public List<User> getChatroomMembers(String chatId) {
         Chatroom c = getChatroom(chatId);
-        if(c == null){
+        if (c == null) {
             return null;
-        }
-        else{
+        } else {
             List<User> lstUsers = new ArrayList<>();
-            for(ChatroomMember member : c.getChatroomMembers()){
-                lstUsers.add(member.getIdNguoinhan());
+            for (User member : c.getChatroomMembers()) {
+                lstUsers.add(member);
             }
             return lstUsers;
         }
+    }
+
+    public Chatroom findPrivateChatroomByUsernames(String senderUsername, String recipientUsername) {
+        User sender = userService.getUserFromUserDetails(userService.loadUserByUsername(senderUsername));
+        User recipient = userService.getUserFromUserDetails(userService.loadUserByUsername(recipientUsername));
+        return chatroomRepository.findChatroomByMembers(sender.getUserid(), recipient.getUserid())
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay chatroom"));
+    }
+
+    public List<ChatroomResponse> returnAvailableChatResponseForUser(User user) {
+        // 1. Get all chatrooms where the user is a member
+        List<Chatroom> chatrooms = chatroomRepository.findAllByChatroomMembersUserid(user.getUserid()).stream()
+                .filter(c -> c.getChatroomMembers().size() > 1)
+                .collect(Collectors.toList());
+
+        // 2. Map chatroom to response, sort by latest message (thoigiangui)
+        List<ChatroomResponse> responses = chatrooms.stream()
+                .map(chatroom -> {
+                    Message latestMsg = chatroom.getMessages().stream()
+                            .max(Comparator.comparing(Message::getThoigiangui,
+                                    Comparator.nullsFirst(Comparator.naturalOrder())))
+                            .orElse(null);
+                    return ChatroomResponse.toDto(chatroom, latestMsg);
+                })
+                .sorted((a, b) -> {
+                    Date dateA = a.latestMessage() != null ? a.latestMessage().getThoigiangui() : null;
+                    Date dateB = b.latestMessage() != null ? b.latestMessage().getThoigiangui() : null;
+                    if (dateA == null && dateB == null)
+                        return 0;
+                    if (dateA == null)
+                        return 1;
+                    if (dateB == null)
+                        return -1;
+                    return dateB.compareTo(dateA);
+                })
+                .collect(Collectors.toList());
+
+        // 3. Find all users except current
+        List<User> allUsers = userService.getConnectedUsers().stream()
+                .filter(u -> !u.getUsername().equals(user.getUsername()))
+                .toList();
+
+        // 4. For each user, if no private chatroom exists, create a virtual
+        // ChatroomResponse
+        for (User other : allUsers) {
+            boolean exists = chatrooms.stream()
+                    .anyMatch(c -> c.getChatroomMembers().stream()
+                            .anyMatch(mem -> mem.getUsername().equals(other.getUsername())));
+            if (!exists) {
+                Chatroom virtualRoom = new Chatroom();
+                virtualRoom.setTenchatroom(other.getUsername());
+                virtualRoom.setChatroomMembers(Arrays.asList(user, other));
+                responses.add(ChatroomResponse.toDto(virtualRoom, null));
+            }
+        }
+
+        // 5. Resort after adding virtual rooms
+        responses.sort((a, b) -> {
+            Date dateA = a.latestMessage() != null ? a.latestMessage().getThoigiangui() : null;
+            Date dateB = b.latestMessage() != null ? b.latestMessage().getThoigiangui() : null;
+            if (dateA == null && dateB == null)
+                return 0;
+            if (dateA == null)
+                return 1;
+            if (dateB == null)
+                return -1;
+            return dateB.compareTo(dateA);
+        });
+
+        return responses;
     }
 }

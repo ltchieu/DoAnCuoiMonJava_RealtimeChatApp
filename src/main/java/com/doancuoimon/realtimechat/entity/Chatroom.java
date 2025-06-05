@@ -15,9 +15,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -43,7 +41,8 @@ public class Chatroom {
     @Column(name = "TENCHATROOM", length = 200)
     private String tenchatroom;
 
-    @OneToMany(mappedBy = "idChatroom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatroomMember> chatroomMembers = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "chatroom_user", joinColumns = @JoinColumn(name = "ID_CHATROOM"), inverseJoinColumns = @JoinColumn(name = "USER_ID"))
+    private List<User> chatroomMembers = new ArrayList<>();
 
 }

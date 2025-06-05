@@ -8,20 +8,15 @@ package com.doancuoimon.realtimechat.dto.request;
  *
  * @author ADMIN
  */
-import com.doancuoimon.realtimechat.entity.Chatroom;
-import com.doancuoimon.realtimechat.entity.User;
 import lombok.Value;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * DTO for {@link com.examplechatapplication.chatapp.entity.Message}
  */
 @Value
 public class MessageCreationRequest implements Serializable {
-    String idMessage;
     String idChatroom;
     String noidungtn;
-    User nguoigui;
 }
