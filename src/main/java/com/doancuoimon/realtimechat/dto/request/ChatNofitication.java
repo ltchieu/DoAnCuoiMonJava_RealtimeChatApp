@@ -9,15 +9,18 @@ public class ChatNofitication {
     String idChatroom;
     String noidungtn;
     String idNguoiGui;
-    String idNguoiNhan;
 
     public ChatNofitication() {
     }
 
-    public ChatNofitication(String idChatroom, String noidungtn, String idNguoiGui, String idNguoiNhan) {
+    public ChatNofitication(String idChatroom, String noidungtn, String idNguoiGui) {
         this.idChatroom = idChatroom;
         this.noidungtn = noidungtn;
         this.idNguoiGui = idNguoiGui;
-        this.idNguoiNhan = idNguoiNhan;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", idChatroom, idNguoiGui, noidungtn);
     }
 }

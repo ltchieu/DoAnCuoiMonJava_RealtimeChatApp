@@ -23,5 +23,5 @@ import java.util.List;
 public class ChatroomCreationRequest {
     private String tenchatroom;
     private BackgroundColor idChuDe;
-    private List<String> usernameNguoiNhans = new ArrayList<>();
+    private List<String> useridNguoiNhans = new ArrayList<>();
 }

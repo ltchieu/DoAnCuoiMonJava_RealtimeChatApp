@@ -81,8 +81,8 @@ public class UserService implements UserDetailsService {
         return userRepository.findAllByStatus(1);
     }// Lấy ra các user có trạng thái là đang hoạt động
 
-    public List<User> getUserByUsernames(List<String> usernames) {
-        return this.userRepository.findByUsernameIn(usernames);
+    public List<User> getUserByUserids(List<String> userids) {
+        return this.userRepository.findByUseridIn(userids);
     }
 
     @Override

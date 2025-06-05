@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.List;
 
@@ -84,9 +86,10 @@ public class Controller {
     }
 
     @GetMapping("/chatroom/{username}")
-    public ChatroomResponse getChatroomBetweenUsers(@PathVariable("username") String username, Authentication authentication) {
+    public ChatroomResponse getChatroomBetweenUsers(@PathVariable("username") String username,
+            Authentication authentication) {
         return ChatroomResponse
-                .toDto(chatRoomService.findPrivateChatroomByUsernames(authentication.getName(), username));
+                .toDto(chatRoomService.findPrivateChatroomByUsernames(authentication.getName(), username), null);
 
     }
     // endregion
@@ -112,25 +115,34 @@ public class Controller {
         User nguoiGui = userService.getUserFromUserDetails(userService.loadUserByUsername(authentication.getName()));
         Message newMessage = messageService.saveMessage(message, nguoiGui);
         log.info("Message {}", newMessage.getNoidungtn());
-        List<User> lstIdNguoiNhan = chatRoomService.getChatroomMembers(newMessage.getIdChatroom().getIdChatroom());
-        for (User u : lstIdNguoiNhan) {
-            ChatNofitication chatNofitication = new ChatNofitication(
-                    newMessage.getIdChatroom().getIdChatroom(),
-                    newMessage.getNoidungtn(),
-                    newMessage.getNguoigui().getUserid(),
-                    u.getUsername());
-            String destination = "/topic/messages/" + message.getIdChatroom();
-            log.info("destination {} length {}", destination, destination.length());
-            messagingTemplate.convertAndSend(destination, chatNofitication);
-        }
-
+        ChatNofitication chatNofitication = new ChatNofitication(
+                newMessage.getIdChatroom().getIdChatroom(),
+                newMessage.getNoidungtn(),
+                newMessage.getNguoigui().getUserid());
+        String destination = "/topic/messages/" + message.getIdChatroom();
+        messagingTemplate.convertAndSend(destination, chatNofitication);
     }
     // endregion
+
+    @GetMapping("chatroom")
+    public List<ChatroomResponse> getChatrooms(Authentication authentication) {
+        String username = authentication.getName();
+        User currentUser = userService.getUserFromUserDetails(userService.loadUserByUsername(username));
+
+        return chatRoomService.returnAvailableChatResponseForUser(currentUser);
+
+    }
 
     @PostMapping("/chatroom")
     public Chatroom addChatroom(@RequestBody ChatroomCreationRequest chatroomCreationRequest,
             Authentication authentication) {
         UserDetailsImpl userContext = (UserDetailsImpl) userService.loadUserByUsername(authentication.getName());
         return chatRoomService.createChatroom(chatroomCreationRequest, userContext.user());
+    }
+
+    @EventListener
+    public void handleSessionSubscribeEvent(SessionSubscribeEvent event) {
+        log.info("User subscribed: {}", event.getUser());
+        log.info("Subscription details: {}", event.getMessage());
     }
 }

@@ -10,6 +10,7 @@ package com.doancuoimon.realtimechat.repository;
  */
 import com.doancuoimon.realtimechat.entity.Chatroom;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,6 @@ public interface ChatroomRepository extends JpaRepository<Chatroom, String> {
     Optional<Chatroom> findChatroomByMembers(@Param("senderId") String senderId,
             @Param("recipientId") String recipientId);
 
+    @Query("SELECT DISTINCT c FROM Chatroom c JOIN FETCH c.chatroomMembers WHERE :userId IN (SELECT u.userid FROM c.chatroomMembers u)")
+    List<Chatroom> findAllByChatroomMembersUserid(String userId);
 }
