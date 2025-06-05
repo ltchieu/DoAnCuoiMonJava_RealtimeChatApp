@@ -21,12 +21,15 @@ import com.doancuoimon.realtimechat.service.UserService;
 
 import java.util.ArrayList;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -42,6 +45,7 @@ import java.util.List;
 
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 @Slf4j
 @RestController
@@ -118,7 +122,7 @@ public class Controller {
         ChatNofitication chatNofitication = new ChatNofitication(
                 newMessage.getIdChatroom().getIdChatroom(),
                 newMessage.getNoidungtn(),
-                newMessage.getNguoigui().getUserid());
+                newMessage.getNguoigui().getNickname());
         String destination = "/topic/messages/" + message.getIdChatroom();
         messagingTemplate.convertAndSend(destination, chatNofitication);
     }
@@ -134,10 +138,17 @@ public class Controller {
     }
 
     @PostMapping("/chatroom")
-    public Chatroom addChatroom(@RequestBody ChatroomCreationRequest chatroomCreationRequest,
+    public Chatroom addChatroom(@RequestBody ChatroomCreationRequest chatroomCreationRequest) {
+        return chatRoomService.createChatroom(chatroomCreationRequest);
+    }
+
+    @PostMapping("/api/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) {
-        UserDetailsImpl userContext = (UserDetailsImpl) userService.loadUserByUsername(authentication.getName());
-        return chatRoomService.createChatroom(chatroomCreationRequest, userContext.user());
+        if (authentication != null) {
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        }
+        return ResponseEntity.ok().build();
     }
 
     @EventListener
