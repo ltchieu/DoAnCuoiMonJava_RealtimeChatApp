@@ -493,6 +493,28 @@ body {
   cursor: not-allowed;
 }
 
+#imageOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+
+  cursor: zoom-out;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+#imageOverlay img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #000;
+  cursor: zoom-out;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

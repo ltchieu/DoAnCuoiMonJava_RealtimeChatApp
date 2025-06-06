@@ -13,6 +13,7 @@ import java.time.Instant;
 @Table(name = "ATTACHMENT")
 public class Attachment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_ATTACH", nullable = false)
     private Integer idAttach;
 

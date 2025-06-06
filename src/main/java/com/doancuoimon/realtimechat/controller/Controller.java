@@ -15,10 +15,13 @@ import com.doancuoimon.realtimechat.entity.Chatroom;
 import com.doancuoimon.realtimechat.entity.Message;
 import com.doancuoimon.realtimechat.entity.User;
 import com.doancuoimon.realtimechat.entity.UserDetailsImpl;
+import com.doancuoimon.realtimechat.service.AttachmentService;
 import com.doancuoimon.realtimechat.service.ChatRoomService;
 import com.doancuoimon.realtimechat.service.MessageService;
 import com.doancuoimon.realtimechat.service.UserService;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,11 +37,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.List;
@@ -60,6 +60,8 @@ public class Controller {
     private final MessageService messageService;
     @Autowired
     private ChatRoomService chatRoomService;
+    @Autowired
+    private AttachmentService attachmentService;
 
     // region UserController
     @MessageMapping("/users.addUser")
@@ -118,7 +120,7 @@ public class Controller {
             Authentication authentication) {
         User nguoiGui = userService.getUserFromUserDetails(userService.loadUserByUsername(authentication.getName()));
         Message newMessage = messageService.saveMessage(message, nguoiGui);
-        log.info("Message {}", newMessage.getNoidungtn());
+        log.info("Message: {}", newMessage.getNoidungtn());
         ChatNofitication chatNofitication = new ChatNofitication(
                 newMessage.getIdChatroom().getIdChatroom(),
                 newMessage.getNoidungtn(),
@@ -128,6 +130,7 @@ public class Controller {
     }
     // endregion
 
+    // region Chatroom Controller
     @GetMapping("chatroom")
     public List<ChatroomResponse> getChatrooms(Authentication authentication) {
         String username = authentication.getName();
@@ -156,4 +159,25 @@ public class Controller {
         log.info("User subscribed: {}", event.getUser());
         log.info("Subscription details: {}", event.getMessage());
     }
+    //endregion
+
+    //region Attachment Controller
+    @PostMapping("/upload")
+    public ResponseEntity<AttachmentCreationRequest> uploadFile(
+            @RequestParam("file") MultipartFile file) throws IOException {
+        AttachmentCreationRequest attachment = attachmentService.storeAttachment(file);
+
+        // Trả về URL tương đối
+        String baseUrl = "/uploads/";
+        if (attachment.getImageUrl() != null) {
+            attachment.setImageUrl(baseUrl + "images/" + Paths.get(attachment.getImageUrl()).getFileName().toString());
+            log.info("Image URL returned: {}", attachment.getImageUrl());
+        }
+        if (attachment.getFileUrl() != null) {
+            attachment.setFileUrl(baseUrl + "files/" + Paths.get(attachment.getFileUrl()).getFileName().toString());
+            log.info("File URL returned: {}", attachment.getFileUrl());
+        }
+        return ResponseEntity.ok(attachment);
+    }
+    //endregion
 }

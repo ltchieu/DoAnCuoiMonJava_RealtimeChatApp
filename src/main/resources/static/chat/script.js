@@ -13,12 +13,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const userList = document.getElementById("user-list");
   const selectedCount = document.getElementById("selected-count");
   const groupNameInput = document.getElementById("group-name");
+  const overlay = document.getElementById("imageOverlay");
+  const overlayImg = overlay.querySelector("img");
+  const closeBtn = overlay.querySelector(".closeBtn");
 
   let stompClient = null;
   let currentUser = null;
   let currentChatId = null;
   let contacts = [];
   let selectedUsers = [];
+
+  closeBtn.addEventListener("click", () => {
+    overlay.style.display = "none";
+    overlayImg.src = "";
+  });
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      overlay.style.display = "none";
+      overlayImg.src = "";
+    }
+  });
 
   // Get current session user from backend
   async function fetchCurrentUser() {
@@ -118,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Add message to chat
-  function addMessage(message, sender, isSent) {
+  function addMessage(message, sender, isSent, originalFilename = null) {
     const messageElement = document.createElement("div");
     messageElement.classList.add("message");
     messageElement.classList.add(isSent ? "sent" : "received");
@@ -150,9 +165,59 @@ document.addEventListener("DOMContentLoaded", () => {
     messageContent.classList.add("message-content");
 
     const messageText = document.createElement("p");
-    messageText.textContent = message;
 
-    messageContent.appendChild(messageText);
+    const isImage = message.match(/\.(jpg|jpeg|png|gif|bmp)$/i); // Kiểm tra xem có phải ảnh không
+    const isFile = message.includes("/uploads/files/") && !isImage;
+
+    if (isImage) {
+      const img = document.createElement("img");
+      img.src = message;
+      img.alt = "Image";
+      img.style.maxWidth = "400px";
+      img.style.maxHeight = "400px";
+      img.style.borderRadius = "10px";
+      img.style.display = "block";
+      img.style.background = "transparent"; // 👈 Trong suốt
+      messageContent.style.background = "transparent"; // 👈 Trong suốt nền thẻ chứa
+      messageContent.appendChild(img);
+
+      img.addEventListener("click", () => {
+        overlay.style.display = "flex";
+        overlayImg.src = img.src;
+      });
+    }
+    else if (isFile) {
+      const fileIcon = document.createElement("span");
+      fileIcon.innerHTML = '<i class="fas fa-file-alt"></i>';
+      fileIcon.style.fontSize = "1.2em";
+      fileIcon.style.marginRight = "5px";
+
+      const fileName = originalFilename || decodeURIComponent(message.split("/").pop());
+
+      const fileLink = document.createElement("a");
+      fileLink.href = message;
+      fileLink.target = "_blank";
+      fileLink.download = fileName;
+      fileLink.textContent = fileName;
+      fileLink.style.color = "#333";
+      fileLink.style.fontWeight = "bold";
+      fileLink.style.textDecoration = "none";
+
+      const fileRow = document.createElement("div");
+      fileRow.style.display = "flex";
+      fileRow.style.alignItems = "center";
+      fileRow.appendChild(fileIcon);
+      fileRow.appendChild(fileLink);
+
+      messageContent.appendChild(fileRow);
+      messageContent.style.background = "#e6e6e6";
+      messageContent.style.borderRadius = "8px";
+      messageContent.style.padding = "8px 12px";
+    } else {
+      messageText.textContent = message;
+      messageContent.appendChild(messageText);
+    }
+
     messageDiv.appendChild(messageContent);
     messageElement.appendChild(messageDiv);
 
@@ -174,6 +239,42 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       addMessage(message, "", true);
       messageInput.value = "";
+    }
+  }
+
+  //Upload file về server
+  async function uploadAndSendFile(file, isImage) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const attachment = await response.json();
+        const fileUrl = attachment.imageUrl || attachment.fileUrl;
+        const originalFilename = attachment.originalFilename;// Lấy URL từ imageUrl hoặc fileUrl
+        console.log('File uploaded:', fileUrl);
+        if (stompClient && currentChatId) {
+          stompClient.send(
+              "/app/chat",
+              {},
+              JSON.stringify({
+                idChatroom: currentChatId.trim(),
+                noidungtn: fileUrl,
+              }),
+          );
+          addMessage(fileUrl, "", true, originalFilename); // Hiển thị ngay với fileUrl
+        }
+      } else {
+        alert('Failed to upload file');
+      }
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      alert('Error uploading file');
     }
   }
 
@@ -389,7 +490,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Add event listeners for attachment icons
+  // Add event listeners for attachment image
   document
     .querySelector(".input-actions .fa-image")
     .addEventListener("click", () => {
@@ -402,12 +503,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (file) {
           console.log("Image selected:", file.name);
           // Here you can add image upload functionality
-          alert(`Image selected: ${file.name}`);
+          uploadAndSendFile(file, true)
         }
       };
       imageInput.click();
     });
 
+  // Add event listeners for attachment file
   document
     .querySelector(".input-actions .fa-paperclip")
     .addEventListener("click", () => {
@@ -419,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (file) {
           console.log("File selected:", file.name);
           // Here you can add file upload functionality
-          alert(`File selected: ${file.name}`);
+          uploadAndSendFile(file, true);
         }
       };
       fileInput.click();
