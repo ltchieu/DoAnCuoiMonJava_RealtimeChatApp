@@ -1,5 +1,6 @@
 package com.doancuoimon.realtimechat.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -52,14 +53,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/sign-up").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(c -> c
-                            .loginPage("/auth/sign-in.html")
-                            .loginProcessingUrl("/login")
-                            .permitAll())
-                .csrf(AbstractHttpConfigurer::disable) .logout(logout -> logout
-                .logoutUrl("/api/logout")
-                .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
-            );
+                        .loginPage("/auth/sign-in.html")
+                        .loginProcessingUrl("/login")
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write("{\"error\": \"Sai username hoặc mật khẩu\"}");
+                        })
+                        .permitAll())
+                .csrf(AbstractHttpConfigurer::disable).logout(logout -> logout
+                        .logoutUrl("/api/logout")
+                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
+                );
 
         return http.build();
     }
+
 }

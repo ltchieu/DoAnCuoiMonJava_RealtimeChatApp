@@ -46,7 +46,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (response.ok) {
                     window.location.href = "/chat/index.html";
                 } else {
-                    showError("password", "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+                    try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.error) {
+                            showError("login", errorData.error);
+                        } else {
+                            showError("login", "Đăng nhập thất bại. Vui lòng thử lại.");
+                        }
+                    } catch (err) {
+                        showError("login", "Đăng nhập thất bại. Vui lòng thử lại.");
+                    }
                 }
             }
         });
