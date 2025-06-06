@@ -42,7 +42,7 @@ public class Chatroom {
     private String tenchatroom;
 
     @ManyToMany
-    @JoinTable(name = "chatroom_user", joinColumns = @JoinColumn(name = "ID_CHATROOM"), inverseJoinColumns = @JoinColumn(name = "USER_ID"))
+    @JoinTable(name = "chatroom_user", joinColumns = @JoinColumn(name = "ID_CHATROOM"), inverseJoinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "USERID"))
     private List<User> chatroomMembers = new ArrayList<>();
 
 }

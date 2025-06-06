@@ -91,13 +91,15 @@ public class Controller {
         return kq;
     }
 
-    @GetMapping("/chatroom/{username}")
-    public ChatroomResponse getChatroomBetweenUsers(@PathVariable("username") String username,
-            Authentication authentication) {
-        return ChatroomResponse
-                .toDto(chatRoomService.findPrivateChatroomByUsernames(authentication.getName(), username), null);
+//    @GetMapping("/chatroom/{username}")
+//    public ChatroomResponse getChatroomBetweenUsers(@PathVariable("username") String username,
+//            Authentication authentication) {
+//        return ChatroomResponse
+//                .toDto(chatRoomService.findPrivateChatroomByUsernames(authentication.getName(), username), null);
+//
+//    }
 
-    }
+
     // endregion
 
     // region MessageController
@@ -158,6 +160,16 @@ public class Controller {
     public void handleSessionSubscribeEvent(SessionSubscribeEvent event) {
         log.info("User subscribed: {}", event.getUser());
         log.info("Subscription details: {}", event.getMessage());
+    }
+
+    @GetMapping("/chatroom/search/{tenchatroom}")
+    public List<ChatroomResponse> searchUsers(@PathVariable("tenchatroom") String tenchatroom) {
+        List<Chatroom> lst = chatRoomService.findChatroomByTenchatroom(tenchatroom);
+        List<ChatroomResponse> kq = new ArrayList<>();
+        for (Chatroom chatroom : lst) {
+            kq.add(ChatroomResponse.toDto(chatroom, null));
+        }
+        return kq;
     }
     //endregion
 

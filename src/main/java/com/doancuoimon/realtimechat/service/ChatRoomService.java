@@ -72,11 +72,22 @@ public class ChatRoomService {
         }
     }
 
-    public Chatroom findPrivateChatroomByUsernames(String senderUsername, String recipientUsername) {
+    public List<Chatroom> findPrivateChatroomByUsernames(String senderUsername, String recipientUsername) {
         User sender = userService.getUserFromUserDetails(userService.loadUserByUsername(senderUsername));
         User recipient = userService.getUserFromUserDetails(userService.loadUserByUsername(recipientUsername));
-        return chatroomRepository.findChatroomByMembers(sender.getUserid(), recipient.getUserid())
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay chatroom"));
+        List<Chatroom> chatrooms = chatroomRepository.findChatroomByMembers(sender.getUserid(), recipient.getUserid());
+
+        if (chatrooms == null || chatrooms.isEmpty()) {
+            throw new IllegalArgumentException("Khong tim thay chatroom");
+        }
+
+        return chatrooms;
+    }
+
+    public List<Chatroom> findChatroomByTenchatroom(String tenchatroom) {
+        List<Chatroom> chatrooms = new ArrayList<>();
+        chatrooms = chatroomRepository.findChatroomByTenchatroom(tenchatroom);
+        return chatrooms;
     }
 
     public List<ChatroomResponse> returnAvailableChatResponseForUser(User user) {

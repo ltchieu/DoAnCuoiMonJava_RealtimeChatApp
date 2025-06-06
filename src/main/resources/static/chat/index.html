@@ -23,10 +23,14 @@
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search Messenger">
+                    <input type="text" id="searchInput" placeholder="Search Messenger">
                 </div>
             </div>
+            <div id="search-error-box" style="display: none">
+                <p id="search-error-content"></p>
+            </div>
             <div class="contacts" id="contacts">
+
                 <!-- Contacts will be loaded here dynamically -->
             </div>
         </div>

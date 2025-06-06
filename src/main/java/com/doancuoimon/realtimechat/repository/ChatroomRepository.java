@@ -25,9 +25,12 @@ public interface ChatroomRepository extends JpaRepository<Chatroom, String> {
             GROUP BY c.ID_CHATROOM, c.NGAYLAP, c.ID_CHUDE, c.TENCHATROOM
             HAVING COUNT(DISTINCT cu.USER_ID) = 2
             """, nativeQuery = true)
-    Optional<Chatroom> findChatroomByMembers(@Param("senderId") String senderId,
+    List<Chatroom> findChatroomByMembers(@Param("senderId") String senderId,
             @Param("recipientId") String recipientId);
 
     @Query("SELECT DISTINCT c FROM Chatroom c JOIN FETCH c.chatroomMembers WHERE :userId IN (SELECT u.userid FROM c.chatroomMembers u)")
     List<Chatroom> findAllByChatroomMembersUserid(String userId);
+
+    @Query("SELECT c FROM Chatroom c WHERE LOWER(c.tenchatroom) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Chatroom> findChatroomByTenchatroom(@Param("keyword") String keyword);
 }
