@@ -34,7 +34,7 @@ public class ChatRoomService {
     @Autowired
     private UserService userService;
 
-    public Chatroom createChatroom(ChatroomCreationRequest request, User nguoiTao) {
+    public Chatroom createChatroom(ChatroomCreationRequest request) {
         Chatroom chatroom = new Chatroom();
 
         List<User> listNguoiNhans = userService.getUserByUserids(request.getUseridNguoiNhans());
@@ -42,7 +42,6 @@ public class ChatRoomService {
         chatroom.setIdChatroom(chatID);
         chatroom.setIdChude(request.getIdChuDe());
         chatroom.getChatroomMembers().addAll(listNguoiNhans);
-        chatroom.getChatroomMembers().add(nguoiTao);
 
         if (StringUtils.isEmpty(request.getTenchatroom()))
             chatroom.setTenchatroom(

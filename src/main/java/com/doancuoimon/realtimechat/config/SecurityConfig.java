@@ -55,7 +55,10 @@ public class SecurityConfig {
                             .loginPage("/auth/sign-in.html")
                             .loginProcessingUrl("/login")
                             .permitAll())
-                .csrf(AbstractHttpConfigurer::disable);
+                .csrf(AbstractHttpConfigurer::disable) .logout(logout -> logout
+                .logoutUrl("/api/logout")
+                .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
+            );
 
         return http.build();
     }

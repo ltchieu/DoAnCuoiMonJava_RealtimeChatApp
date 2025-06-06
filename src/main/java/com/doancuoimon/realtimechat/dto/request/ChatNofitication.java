@@ -8,19 +8,19 @@ import lombok.Setter;
 public class ChatNofitication {
     String idChatroom;
     String noidungtn;
-    String idNguoiGui;
+    String tenNguoiGui;
 
     public ChatNofitication() {
     }
 
-    public ChatNofitication(String idChatroom, String noidungtn, String idNguoiGui) {
+    public ChatNofitication(String idChatroom, String noidungtn, String tenNguoiGui) {
         this.idChatroom = idChatroom;
         this.noidungtn = noidungtn;
-        this.idNguoiGui = idNguoiGui;
+        this.tenNguoiGui = tenNguoiGui;
     }
 
     @Override
     public String toString() {
-        return String.format("%s %s %s", idChatroom, idNguoiGui, noidungtn);
+        return String.format("%s %s %s", idChatroom, tenNguoiGui, noidungtn);
     }
 }
